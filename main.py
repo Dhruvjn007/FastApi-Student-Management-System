@@ -10,6 +10,8 @@ from auth_utils import verify_password, hash_password, create_access_token, get_
 import os
 import shutil
 from dotenv import load_dotenv
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 load_dotenv(dotenv_path="config.env")
 
@@ -22,6 +24,8 @@ def get_db():
         db.close()
 
 app = FastAPI()
+
+app.mount("/uploads",StaticFiles(directory = "uploads"),name = "uploads")
 
 @app.get("/students",response_model=List[StudentOut])
 def get_all_students(db: Session = Depends(get_db)):
@@ -206,8 +210,19 @@ async def upload_profile_pic(roll_num:str,file:UploadFile = File(...,description
         f.write(contents)
 
     student.profile_pic_path = file_path
+    db.commit()
 
     return {"message":f"profile picture of {roll_num} uploaded", "path":file_path}
+
+@app.get("/students/{roll_num}/profile-pic")
+def get_profile_pic(roll_num:str, db:Session=Depends(get_db)):
+    student = db.query(Student).filter(Student.roll_num == roll_num).first()
+
+    if not student or not student.profile_pic_path:
+        raise HTTPException(status_code = 404, detail = f"Profile picture not found for {roll_num}")
+    
+    return FileResponse(student.profile_pic_path)
+
 
 
 
