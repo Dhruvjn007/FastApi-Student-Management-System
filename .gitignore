@@ -1,0 +1,13 @@
+# secrets
+config.env
+
+# virtual environment
+.env/
+
+# python cache
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
