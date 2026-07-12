@@ -2,9 +2,9 @@ from database import SessionLocal
 from fastapi import FastAPI, Depends, HTTPException, Query, UploadFile, File
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from models import Student, Users
+from models import Student, Users, Marks
 from typing import List
-from schemas import StudentOut,StudentCreate,StudentUpdate, UserCreate
+from schemas import StudentOut,StudentCreate,StudentUpdate, UserCreate, MarksCreate, MarksOut
 from sqlalchemy import asc, desc, func, Integer
 from auth_utils import verify_password, hash_password, create_access_token, get_current_user
 import os
@@ -223,6 +223,27 @@ def get_profile_pic(roll_num:str, db:Session=Depends(get_db)):
     
     return FileResponse(student.profile_pic_path)
 
+@app.post("/students/{roll_num}/marks")
+def add_marks(roll_num: str, marks_data: MarksCreate, db: Session = Depends(get_db)):
+    student = db.query(Student).filter(Student.roll_num == roll_num).first()
+
+    if not student:
+        raise HTTPException(status_code=404, detail = f"student with {roll_num} not found")
+    
+    new_marks = Marks(student_id = student.id, **marks_data.model_dump())
+    db.add(new_marks)
+    db.commit()
+
+    return {"message": "marks added for {roll_num}"}
+
+@app.get("/students/{roll_num}/retrieve_marks",response_model=List[MarksOut])
+def get_marks(roll_num: str, db: Session = Depends(get_db)):
+    student = db.query(Student).filter(Student.roll_num == roll_num).first()
+
+    if not student:
+        raise HTTPException(status_code=404, detail = f"student with {roll_num} not found")
+    
+    return student.marks
 
 
 

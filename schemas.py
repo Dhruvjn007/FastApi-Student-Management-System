@@ -64,7 +64,7 @@ class StudentOut(BaseModel):
     @property
     def email(self) -> str:
         return f"{self.roll_num}@lnmiit.ac.in"
-    
+       
     class Config:
         from_attributes = True
 
@@ -72,4 +72,16 @@ class UserCreate(BaseModel):
     username: Annotated[str,Field(...,description = "username of the user",min_length = 3)]
     password: Annotated[str,Field(...,description = "password of the user",min_length = 6)]
 
-    
+class MarksCreate(BaseModel):
+    subject: Annotated[str, Field(...)]
+    marks_obtained: Annotated[int, Field(..., ge = 0)]
+    maximum_marks: Annotated[int,Field(...,gt = 0)]
+
+class MarksOut(BaseModel):
+    id: int
+    subject: str
+    marks_obtained: int
+    maximum_marks: int
+
+    class Config:
+        from_attributes = True
