@@ -236,7 +236,7 @@ def add_marks(roll_num: str, marks_data: MarksCreate, db: Session = Depends(get_
 
     return {"message": "marks added for {roll_num}"}
 
-@app.get("/students/{roll_num}/retrieve_marks",response_model=List[MarksOut])
+@app.get("/students/{roll_num}/marks",response_model=List[MarksOut])
 def get_marks(roll_num: str, db: Session = Depends(get_db)):
     student = db.query(Student).filter(Student.roll_num == roll_num).first()
 
